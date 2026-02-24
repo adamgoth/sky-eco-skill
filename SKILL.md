@@ -1,6 +1,6 @@
 ---
 name: sky
-description: Answer questions about the Sky Ecosystem using the Sky Atlas, Sky Forum, and info.sky.money. Chooses the right source(s) based on the query.
+description: A Claude Code skill for querying the Sky Ecosystem — governance rules, forum discussions, live protocol data, and smart contract/chainlog lookups.
 argument-hint: [question about Sky]
 ---
 
@@ -72,9 +72,40 @@ Answer the following question about the Sky Ecosystem:
    - Smart contract details/ABIs/on-chain mechanics → **Chainlog + Etherscan**
    - If the question spans multiple areas, fetch from multiple sources
 
-2. **Fetch the relevant source(s)** using WebFetch from the URLs above.
+2. **Delegate heavy fetches to subagents** to keep the main context window clean. Raw source documents (the Atlas, Solidity source code, forum threads) are large and will bloat your context if fetched directly. Use the Task tool to spawn subagents that do the fetching and return only concise findings.
 
-3. **Answer the question** based on the fetched content:
+   **Sky Atlas** — spawn a `general-purpose` subagent:
+   ```
+   Task: "Research Sky Atlas for: [question]"
+   Prompt: Fetch the Sky Atlas from [URL above] using WebFetch. Find the sections
+   relevant to the question. Return ONLY: the relevant section references (e.g. A.1.2.3),
+   key quotes, and a concise summary of the answer. Do not return the full Atlas text.
+   ```
+
+   **Sky Forum** — spawn a `general-purpose` subagent:
+   ```
+   Task: "Search Sky Forum for: [topic]"
+   Prompt: Search the Sky Forum using the Discourse JSON API at
+   https://forum.sky.money/search.json?q={query}. Fetch the top relevant topics.
+   Return ONLY: topic titles, authors, dates, key points, and relevant quotes.
+   ```
+
+   **Smart Contracts** — spawn a `Bash` subagent:
+   ```
+   Task: "Fetch and analyze contract: [name]"
+   Prompt: 1) Fetch the chainlog from https://chainlog.sky.money/api/mainnet/active.json
+   to find the contract address. 2) Fetch the source code from Etherscan V2:
+   curl -s "https://api.etherscan.io/v2/api?chainid=1&module=contract&action=getsourcecode&address={ADDRESS}&apikey=$ETHERSCAN_V2_API_KEY"
+   3) Analyze the source code and return ONLY: contract name, key functions with
+   their signatures and logic summaries, relevant state variables, and how they
+   relate to the question. Do not return the full source code.
+   ```
+
+   **info.sky.money** — use `agent-browser` directly (output is already small from snapshots).
+
+   Launch subagents **in parallel** when multiple sources are needed. Wait for all results, then synthesize.
+
+3. **Synthesize and answer** based on the subagent results:
    - Be specific and reference exact sections (e.g., "A.1.2.3") when citing the Atlas
    - Quote relevant passages where helpful
    - If the answer spans multiple sources, synthesize them clearly

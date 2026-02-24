@@ -59,11 +59,15 @@ Once installed, use the `/sky` command in Claude Code:
   ```
   Then restart your terminal or run `source ~/.zshrc`.
 
+## Architecture
+
+The skill delegates heavy data fetches to **subagents** to keep the main context window clean. Large documents like the Sky Atlas and Solidity source code are fetched and analyzed in isolated subagent contexts — only concise findings are returned to the main conversation. Multiple sources are fetched in parallel when needed.
+
 ## Sources
 
 | Source | What it contains | How the skill accesses it |
 |---|---|---|
-| Sky Atlas | Governance rules, roles, processes | Raw markdown from GitHub |
-| Sky Forum | Community discussions, proposals | Discourse JSON API |
+| Sky Atlas | Governance rules, roles, processes | Subagent fetches raw markdown from GitHub |
+| Sky Forum | Community discussions, proposals | Subagent queries Discourse JSON API |
 | info.sky.money | Live protocol metrics, TVL, rates | Browser automation (Cloudflare-protected) |
-| Smart Contracts | Contract ABIs, source code, interfaces | Chainlog + Etherscan API |
+| Smart Contracts | Contract ABIs, source code, interfaces | Subagent queries Chainlog + Etherscan API |
