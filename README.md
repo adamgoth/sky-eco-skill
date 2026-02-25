@@ -1,11 +1,12 @@
 # Sky Ecosystem Skill for Claude Code
 
-A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill that answers questions about the Sky Ecosystem by pulling from four live sources:
+A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill that answers questions about the Sky Ecosystem by pulling from five live sources:
 
 - **Sky Atlas** - The official governance rulebook ([GitHub](https://github.com/sky-ecosystem/next-gen-atlas))
 - **Sky Forum** - Community discussions, proposals, and announcements ([forum.sky.money](https://forum.sky.money))
 - **info.sky.money** - Live protocol data, metrics, and stats ([info.sky.money](https://info.sky.money))
 - **Smart Contracts** - On-chain contract ABIs and source code via [Chainlog](https://chainlog.sky.money) + [Etherscan](https://etherscan.io)
+- **Laniakea Docs** - Infrastructure architecture, capital flows, risk framework, settlement, agents, and roadmap ([GitHub](https://github.com/sky-ecosystem/laniakea-docs))
 
 The skill automatically picks the right source(s) based on your question.
 
@@ -43,6 +44,8 @@ Once installed, use the `/sky` command in Claude Code:
 /sky What are the latest discussions on the forum?
 /sky What's the current savings APY?
 /sky How does the USDS contract work?
+/sky What is the PAU pattern in Laniakea?
+/sky Explain the Laniakea risk framework
 ```
 
 ## Requirements
@@ -71,3 +74,4 @@ The skill delegates heavy data fetches to **subagents** to keep the main context
 | Sky Forum | Community discussions, proposals | Subagent queries Discourse JSON API |
 | info.sky.money | Live protocol metrics, TVL, rates | Browser automation (Cloudflare-protected) |
 | Smart Contracts | Contract ABIs, source code, interfaces | Subagent queries Chainlog + Etherscan API |
+| Laniakea Docs | Infrastructure architecture, risk, settlement, agents, roadmap | Subagent fetches raw markdown from GitHub |

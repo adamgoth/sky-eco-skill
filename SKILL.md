@@ -63,6 +63,42 @@ Answer the following question about the Sky Ecosystem:
      ```
 - **Requires:** The `ETHERSCAN_V2_API_KEY` environment variable must be set. If it's not available, tell the user: "Smart contract lookups require an Etherscan API key. Get a free one at https://etherscan.io/myapikey and set it with: `export ETHERSCAN_V2_API_KEY=your_key_here`" and answer using the other available sources instead.
 
+### 5. Laniakea Documentation
+
+- **What it is:** The comprehensive technical documentation for Laniakea — Sky Ecosystem's infrastructure upgrade for automated capital deployment at scale. Covers the four-layer capital flow architecture (Generator → Prime → Halo → Foreign), the PAU (Parallelized Allocation Unit) smart contract pattern, Basel III-inspired risk framework, daily settlement cycles, LCTS (Liquidity Constrained Token Standard), Sentinel network, Synomic Agent framework, and the 10-phase implementation roadmap.
+- **When to use:** Questions about Laniakea infrastructure, capital flow architecture, PAU pattern, smart contract architecture layers, risk framework/capital requirements, duration model, settlement cycles, LCTS token mechanics, Sentinel formations, beacons, Synomic Agents (Generators, Primes, Halos, Guardians), synomics, teleonomes, growth staking, skychain, or the implementation roadmap.
+- **How to access:** Fetch raw markdown files from GitHub. The subagent should **always start by fetching the repo README** to discover the current directory structure, then navigate to the relevant files:
+  1. Fetch the README first: `https://raw.githubusercontent.com/sky-ecosystem/laniakea-docs/refs/heads/main/README.md`
+  2. Use the README's directory listing to identify which file(s) to fetch for the question
+  3. Fetch those files using the base URL below
+
+  If the README fetch fails, fall back to this routing table (may be stale):
+
+  | Question topic | File(s) to fetch |
+  |---|---|
+  | General overview / what is Laniakea | `whitepaper/sky-whitepaper.md` |
+  | Capital flow architecture / PAU pattern / on-chain design | `smart-contracts/architecture-overview.md` |
+  | LCTS / queue-based tokens / srUSDS / TEJRC / TISRC | `smart-contracts/lcts.md` |
+  | NFAT / term tokens | `smart-contracts/nfat.md` |
+  | Rate limits | `smart-contracts/rate-limits.md` |
+  | Risk framework / capital requirements / duration model | `risk-framework/` (start with `README.md`) |
+  | Settlement / accounting / auctions / daily cycle | `accounting/` (start with `README.md`) |
+  | Roadmap / implementation phases | `roadmap/roadmap-overview.md` |
+  | Synomic Agents (Generator, Prime, Halo, Guardian) | `sky-agents/` (start with `README.md`) |
+  | Sentinels / trading / Sky Intents | `trading/` (start with `README.md`) |
+  | Synomics / beacons / teleonomes / macrosynomics | `synomics/` (start with `synomics-summary.md`) |
+  | Governance transition / Guardians / Alignment Conservers | `governance-transition/` (start with `README.md`) |
+  | Growth staking / SKY staker incentives | `growth-staking/` (start with `README.md`) |
+  | Skychain / AI-native blockchain | `skychain/` (start with `README.md`) |
+  | Glossary / terminology | `whitepaper/appendix-f-glossary.md` |
+  | Token reference | `whitepaper/appendix-d-token-reference.md` |
+  | Deployed contracts / infrastructure | `whitepaper/appendix-g-infrastructure.md` |
+
+  Base URL for raw files:
+  ```
+  https://raw.githubusercontent.com/sky-ecosystem/laniakea-docs/refs/heads/main/{path}
+  ```
+
 ## Instructions
 
 1. **Determine which source(s) to use** based on the question:
@@ -70,6 +106,7 @@ Answer the following question about the Sky Ecosystem:
    - Community discussions/proposals/announcements → **Sky Forum**
    - Live protocol data/metrics/stats → **info.sky.money**
    - Smart contract details/ABIs/on-chain mechanics → **Chainlog + Etherscan**
+   - Laniakea infrastructure/architecture/risk/settlement/agents/roadmap → **Laniakea Docs**
    - If the question spans multiple areas, fetch from multiple sources
 
 2. **Delegate heavy fetches to subagents** to keep the main context window clean. Raw source documents (the Atlas, Solidity source code, forum threads) are large and will bloat your context if fetched directly. Use the Task tool to spawn subagents that do the fetching and return only concise findings.
@@ -102,6 +139,19 @@ Answer the following question about the Sky Ecosystem:
    ```
 
    **info.sky.money** — use `agent-browser` directly (output is already small from snapshots).
+
+   **Laniakea Docs** — spawn a `general-purpose` subagent:
+   ```
+   Task: "Research Laniakea docs for: [question]"
+   Prompt: 1) First, fetch the repo README to discover the current structure:
+   https://raw.githubusercontent.com/sky-ecosystem/laniakea-docs/refs/heads/main/README.md
+   2) Based on the README's directory listing, identify which file(s) are relevant
+   to the question and fetch them from:
+   https://raw.githubusercontent.com/sky-ecosystem/laniakea-docs/refs/heads/main/{path}
+   3) If the first file references other files in the same directory, fetch those too.
+   Return ONLY: the relevant section headings, key quotes, and a concise summary
+   of the answer. Do not return full document text.
+   ```
 
    Launch subagents **in parallel** when multiple sources are needed. Wait for all results, then synthesize.
 
